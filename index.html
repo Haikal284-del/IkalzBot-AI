@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>Menu Chat - WhatsApp Style</title>
+    <title>IkalzBot - AI Chat</title>
     <style>
         body {
             margin: 0;
@@ -276,6 +276,17 @@
             width: 100%;
             height: 100%;
         }
+        #response-container {
+    position: relative;
+    width: 90%; /* Sesuaikan dengan kebutuhan */
+    max-height: 400px; /* Batasi tinggi maksimal */
+    overflow: auto; /* Tambahkan scroll jika konten melebihi batas */
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: #fff; /* Warna latar belakang */
+    padding: 10px; /* Ruang dalam */
+    word-wrap: break-word; /* Membungkus teks panjang */
+}
         #ppWa2 {
             position: absolute;
             width: 14.25%;
@@ -358,6 +369,11 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+iframe, #response-container {
+    max-width: 100%; /* Membatasi lebar */
+    max-height: 100%; /* Membatasi tinggi */
+    overflow: auto; /* Menambahkan scroll jika perlu */
+}
     </style>
 </head>
 <body>
@@ -408,48 +424,53 @@
             var temW = 0;
             var gHeight = 0;
             var level = 80;
-            var date = new Date();
+            var date;
             var chatLoby = "";
             let idCentang=1;
         function sendChat() {
-            if(document.getElementById('pesanText').value==""){
-                alert("Isi dulu pesannya sayang😪");
-                
-            }else{
-            if(tugas==false){
-                tugas=true;
-                textChat = document.getElementById('pesanText').value;
-            var messageContainer = document.getElementById('Messages');
-            var lastMessage = messageContainer.lastChild;
-            var lastMessageHeight = lastMessage ? lastMessage.clientHeight: 0;
-            level += lastMessageHeight + 20; // Add spacing between messages
+            date = new Date();
+    if (document.getElementById('pesanText').value === "") {
+        alert("Isi dulu pesannya sayang😪");
+        return;
+    }
 
-            messageContainer.innerHTML +=
-    '<div class="chat-message" style="position:absolute;border:2px solid black; border-radius:20px;width:auto;max-width:70%;height:auto;background-color:#c0ff73;top:' +
-    level +
-    'px;justify-content: flex-end;font-size:'+ukuranFont+'px; align-self: flex-end;">' +
-    textChat +
-    '<div style="display: flex; justify-content: flex-end; align-items: center; font-size: 30px; margin-top: 5px;">' +
-    '<span style="margin-right: 5px;">' +
-    date.getHours() +
-    "." +
-    date.getMinutes() +
-    '</span>' +
-    `<div id="centang${idCentang}" style="font-size: 35px;">✓</div></div></div>`;
-document.getElementById('pesanText').value = "";
+    if (!tugas) {
+        tugas = true;
+        
+        textChat = document.getElementById('pesanText').value;
+        var messageContainer = document.getElementById('Messages');
+        var lastMessage = messageContainer.lastChild;
+        var lastMessageHeight = lastMessage ? lastMessage.clientHeight : 0;
 
-            // Automatically scroll down
-            messageContainer.scrollTop = messageContainer.scrollHeight;
-
-            // Call function to respond to the message
-            respondToMessage(textChat);
-            
-            }else{
-                alert("Sabar dikit napa, satu satu lah😤")
-            }
-            
+        // Validasi level
+        if (isNaN(level)) {
+            level = 80; // Reset ke nilai awal
         }
-        }
+
+        level += lastMessageHeight + 20; // Tambahkan jarak antar pesan
+        date = new Date();
+        // Tambahkan pesan baru
+        messageContainer.innerHTML += `
+            <div class="chat-message" style="position:absolute;border:2px solid black; border-radius:20px;width:auto;max-width:70%;height:auto;background-color:#c0ff73;top:${level}px;justify-content: flex-end;font-size:${ukuranFont}px; align-self: flex-end;">
+                ${textChat}
+                <div style="display: flex; justify-content: flex-end; align-items: center; font-size: 30px; margin-top: 5px;">
+                    <span style="margin-right: 5px;">
+                        ${date.getHours()}.${date.getMinutes()}
+                    </span>
+                    <div id="centang${idCentang}" style="font-size: 35px;">✓</div>
+                </div>
+            </div>`;
+        document.getElementById('pesanText').value = "";
+
+        // Scroll otomatis ke bawah
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+
+        // Panggil fungsi untuk merespons pesan
+        respondToMessage(textChat);
+    } else {
+        alert("Sabar dikit napa, satu satu lah😤");
+    }
+}
         let txtHasil = "";
         let id = 0;
             var sendBot = 0;
@@ -678,17 +699,58 @@ function chatDuluan(){
         function respondToMessage(message) {
             
                 id++;
+                if (message.includes("#link")){
+                    
+                }else{
                 data.pesan.push(`User: ${textChat}`)
-                
+                }
                 newChat = data.pesan[data.pesan.length-1]
                 
                 upPrompt();
                 if (data.pesan.length > 10) {
                     data.pesan = [];
                 }
-                if (message.toLowerCase().includes("#admin:VikalzDev")) {
-                    responsed="Halo admin!!";
-                    responsBot();
+                if (message.toLowerCase().includes("#link")) {
+                    
+  // Ambil link setelah "#cekLink"
+  let link = message.slice(message.indexOf("#link") + 5).trim();
+
+  // Minta user memasukkan nama file
+  let ids=Math.floor(Math.random()*9999);
+  let filenamed = `WebId_${ids}`;
+
+  // Validasi input
+  if (!link || !filenamed) {
+    alert("Link atau nama file tidak boleh kosong!");
+    return;
+  }
+
+  // Panggil fungsi cekLink (pastikan cekLink sudah async)
+  cekLink(link, filenamed)
+    .then(() => {
+      document.getElementById("statusId").innerHTML="Membuka Tautan...";
+      cekLinks=true;
+      document.getElementById(`centang`+idCentang).innerHTML="✓✓";
+      document.getElementById(`centang`+idCentang).style.color="blue";
+      idCentang++;
+    })
+    .catch((error) => {
+      alert(`Terjadi kesalahan: ${error.message}`);
+    });
+}else if(message.toLowerCase().includes("#musik")){
+    document.getElementById(`centang`+idCentang).innerHTML="✓✓";
+    document.getElementById(`centang`+idCentang).style.color="blue";
+      idCentang++;
+    let lyric = message.slice(message.indexOf("#musik") + 6).trim();
+    document.getElementById("txtLoading").innerHTML=`Mencari ${lyric}...`;
+    document.getElementById("statusId").innerHTML=`Sedang mencari...`;
+    document.querySelector(".spinner").style.borderTop="5px solid red";
+    showLoadingAnimation();
+    setTimeout(function(){
+        hideLoadingAnimation();
+        searchAndSendMusic(lyric);
+    },5000)
+    
     }else{
                 const url = "https://text.pollinations.ai/prompt/"+prompts; // URL yang ingin diambil
                 
@@ -713,6 +775,7 @@ function chatDuluan(){
                        
                         let isi = promptForImg;
                         data.pesan.push(`Respon: ${isi} (Prompt gambarnya)`);
+                        document.querySelector(".spinner").style.borderTop="5px solid blue";
                         document.getElementById('statusId').innerHTML="Membuat gambar...";
                         menggambar=true;
                         newChat=`responlah pesan ini untuk menunjukan bahwa gambarnya telah di hasilkan,contohnya seperti : ini adalah gambar [permintaan user] yang anda butuhkan ,jangan gunakan tanda (") pada kalimatnya.buatlah lah kalimat untuk penunjukan gambarnya di atas. berikut permintaan dari client : ${textChat}`;
@@ -730,6 +793,7 @@ function chatDuluan(){
                            responsed+=" #coding";
                                 if (responsed.includes("#coding")) {
                         let isi = responsed;
+                        document.querySelector(".spinner").style.borderTop="5px solid green";
                         document.getElementById('statusId').innerHTML="Sedang ngoding...";
                         ngoding=true;
                         newChat=`responlah pesan ini untuk menunjukan bahwa kode pemogramannya telah di hasilkan,contohnya seperti : berikut adalah kode yang anda perlukan untuk membuat website sekolah anda,jangan gunakan tanda (") pada kalimatnya.buatlah lah kalimat untuk penunjukan kodenya di atas. kamu hanya memberikan kalimat yang menunjukan kode nya di bawah,kamu tidak perlu memberikan kode lagi karena kode nya sudah dibuat. berikut permintaan dari client : ${textChat}`;
@@ -759,18 +823,129 @@ function chatDuluan(){
                         document.getElementById('statusId').innerHTML="Online";
                         idCentang++;
                     }, Math.floor(Math.random()*3000+500))
-                    
+                    cekLinks=false;
                 },Math.floor(Math.random()*3000+1500))
                 .catch(error => {
                     setTimeout(function() {
-                        responsed="Jaringan lu error nih, lu ada kouta kan?";
-                        responsBot("Jaringan lu error nih, lu ada kouta kan?");
+                        responsed=`Jaringan lu error nih, lu ada kouta kan?, Error code : ${error}`;
+                        responsBot();
                     }, 1500)
-
+                    cekLinks=false;
                 });
     }
             }
+            let wdBot="80%"
+            let cekLinks=false;
+            function displayWebContent(htmlContent) {
+                let messageContainer = document.getElementById("Messages");
+        let lastMessage = messageContainer.lastChild;
+let lastMessageHeight = lastMessage ? lastMessage.clientHeight : 0;
+level+=lastMessageHeight+20;
+    const container = document.createElement("div");
+    container.id = `response-${timestamp}`;
+    container.className = "chat-message";
+    container.style = `
+        position: absolute;
+        border: 2px solid black;
+        border-radius: 20px;
+        width: 70%;
+        max-width: 70%;
+        height: 800px;
+        background-color: #fff;
+        top: ${level}px;
+        justify-content: flex-start;
+        font-size: 16px;
+        align-self: flex-start;
+        white-space: pre-wrap;
+        overflow: hidden;
+    `;
+
+    const iframe = document.createElement("iframe");
+    iframe.style = `
+        width: 100%;
+        height: 800px; /* Atur tinggi */
+        border: none;
+        overflow: auto;
+    `;
+    iframe.srcdoc = htmlContent; // Masukkan isi HTML ke dalam iframe
+
+    container.appendChild(iframe);
+    document.getElementById("Messages").appendChild(container);
+
+    // Tunggu hingga elemen dirender
+    setTimeout(() => {
+         messageContainer = document.getElementById("Messages");
+         lastMessage = messageContainer.lastChild;
+ lastMessageHeight = lastMessage ? lastMessage.clientHeight : 0;
         
+         
+        document.getElementById("Messages").scrollTop = document.getElementById("Messages").scrollHeight;
+    }, 0);
+    tugas=false;
+}
+        async function cekLink(link, filenamed) {
+    const url = link;
+
+    if (!url || !filenamed) {
+        alert("Link atau nama file tidak boleh kosong!");
+        return;
+    }
+    
+    try {
+        const response = await fetch('http://localhost:8080/save-html', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url, filename: filenamed }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || "Gagal mengambil data dari URL.");
+        }
+        const htmlContent = data.dataCode;
+
+        // Tampilkan isi web
+        displayWebContent(htmlContent);
+
+        // Tambahkan tombol unduh
+        
+        
+        responsed=`Ini adalah tampilan web dari ${url}.`;
+        responsBot();
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+function downloadFile(htmlContent,filenamed){
+    downloadFiles(htmlContent,filenamed)
+}
+function downloadFiles(htmlContent,filenamed) {
+    // Membuat elemen <a>
+    const link = document.createElement('a');
+    
+    // Menetapkan atribut href ke elemen <a>
+    link.href = `data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}" download="${filenamed}.html`;
+    
+    // Menambahkan atribut target agar terbuka di tab baru (opsional)
+    link.target = '_blank'; 
+    link.download;
+    // Menyembunyikan elemen <a>
+    link.style.display = 'none';
+    
+    // Menambahkan elemen ke dokumen
+    document.body.appendChild(link);
+    
+    // Melakukan klik otomatis
+    link.click();
+    
+    // Menghapus elemen setelah klik
+    document.body.removeChild(link);
+}
+
+// Contoh penggunaan
+
         function responsBot(chat) {
             setTimeout(function(){
             var messageContainer = document.getElementById('Messages');
@@ -778,15 +953,19 @@ function chatDuluan(){
             var lastMessageHeight = lastMessage ? lastMessage.clientHeight: 0;
             level += lastMessageHeight + 20; // Add spacing between messages
             function escapeHTML(text) {
+                if(cekLinks==false){
             return text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+                }else{
+                    return text;
+                }
             }
             messageContainer.innerHTML +=
-            '<div id="response-'+timestamp+'" class="chat-message" style="position:absolute;border:3px solid '+borderclrBot+'; border-radius:20px;width:auto;max-width:70%;height:auto;background-color:'+bgChatBot+';top:' +
+            '<div id="response-'+timestamp+'" class="chat-message" style="position:absolute;border:3px solid '+borderclrBot+'; border-radius:20px;width:auto;max-width:'+wdBot+';height:auto;background-color:'+bgChatBot+';top:' +
             level +
             'px;justify-content: flex-start;font-size:'+ukuranFont+'px; align-self: flex-start;white-space: pre-wrap;color: '+clrChatBot+';">'+
             escapeHTML(responsed)+
@@ -808,7 +987,11 @@ function chatDuluan(){
                 clrChatBot="black";
                 borderclrBot="black";
                 tugas=false;
+                if (textChat.includes("#link")){
+                    
+                }else{
                 data.pesan.push(`Respon: ${responsed}`);
+                }
                 console.log(data.pesan);
                 setTimeout(function(){
                     let data = new Date();
@@ -851,7 +1034,70 @@ function chatDuluan(){
         
         // Fitur Lainnya :
         // Fungsi untuk mengunduh video menggunakan API Snaptik
+        
+        // Fitur musikApi
+         
 
+// Tambahkan fungsi ini ke tombol atau trigger
+let musikId=1;
+async function searchAndSendMusic(query) {
+    if (!query) {
+        alert("Masukkan kata kunci untuk mencari musik.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/search?query=${query}`);
+        const data = await response.json();
+        responsed=`Berikut hasil pencarian dari ${query}.`
+        responsBot();
+        if (data.length > 0) {
+            setTimeout(function(){
+                const messageContainer = document.getElementById('Messages');
+            const lastMessage = messageContainer.lastChild;
+            const lastMessageHeight = lastMessage ? lastMessage.clientHeight : 0;
+            level += lastMessageHeight + 20;
+
+            data.forEach((track) => {
+                messageContainer.innerHTML +=
+            '<div id="response-'+timestamp+'" class="chat-message" style="position:absolute;border:3px solid '+borderclrBot+'; border-radius:20px;width:100%;max-width:'+wdBot+';height:auto;background-color:'+bgChatBot+';top:' +
+            level +
+            'px;justify-content: flex-start;font-size:'+ukuranFont+'px; align-self: flex-start;white-space: pre-wrap;color: '+clrChatBot+';">'+
+            "<br/>Judul Musik: "+track.title+"<br/> Artist: "+track.artist+"<br/> <audio controls style='width: 100%;'> <source style='width:100%;border: 3px solid blue;height:100px;background-color:green;color:white;'src="+track.preview+" type='audio/mpeg'> Browser Anda tidak mendukung elemen audio. </audio>"+
+            '<div style="font-size:30px; text-align:right;">' +
+            date.getHours() +
+            "." +
+            date.getMinutes() +
+            '</div></div><p/><p/><p/><p/>';
+                musikId++;
+                if(musikId<3){
+                    musikId++;
+                }else{
+                    musikId=1;
+                }
+                level += 220; // Tambahkan jarak vertikal untuk pesan berikutnya
+            });
+
+            messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll ke bawah otomatis
+            },2000)
+            
+        } else {
+            responsed="Tidak ada hasil musik ditemukan untuk pencarian ini.";
+            responsBot();
+        }
+    } catch (error) {
+        responsed="Error saat mencari musik:"+ error;
+        responsBot();
+    }
+}
+
+// Tambahkan fungsi ini ke tombol atau trigger
+function handleMusicSearch() {
+    const query = prompt("Masukkan kata kunci musik:");
+    if (query) {
+        searchAndSendMusic(query);
+    }
+}
     </script>
 </div>
 <div id="loby">
